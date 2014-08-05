@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -13,35 +12,46 @@ namespace CSVSharp
     {
 
        
-        private CSVFile _file;
-        private IList<IList<IList<byte>>> _set;
-        private bool _scaped;
+     
+     
 
         public CSVFile ReadLines(string lineInput)
         {
-            _file = new CSVFile();
-            _set = new List<IList<IList<byte>>>();
             var characters = GetBytes(lineInput);
+            return ReadLines(characters);
+        }
+
+        public CSVFile ReadLines(byte[] readerBytes)
+        {
+            IList<IList<IList<byte>>> _set;
+            bool _scaped;
+            _set = new List<IList<IList<byte>>>();
             _scaped = false;
-            using (new MemoryStream(characters))
+            using (new MemoryStream(readerBytes))
             {
                 var special = false;
                 var line = NewLine();
                 var column = NewColumn();
-                for (int i = 0; i < characters.Length; i = i + 2)
+                for (int i = 0; i < readerBytes.Length; i ++ )
                 {
-                    byte theByte = characters[i];                    
+                    byte theByte = readerBytes[i];
                     switch (theByte)
-                    {                                                
+                    {
+                        case 0:
+                            special = true;
+                            break;
                         case 44:// ,
                             if (_scaped)
-                            {                                
+                            {
                                 break;
                             }
                             line.Add(column);
                             column = NewColumn();
                             special = true;
-                            break;                                                
+                            break;
+                        case 13:
+                            special = true;
+                            break;
                         case 10:// \n
                             if (_scaped)
                             {
@@ -49,12 +59,12 @@ namespace CSVSharp
                                 break;
                             }
 
-                            line.Add(column);                            
+                            line.Add(column);
                             _set.Add(line);
-                            
+
                             column = NewColumn();
                             line = NewLine();
-                            
+
                             break;
                         case 34:// "
                             special = true;
@@ -68,24 +78,28 @@ namespace CSVSharp
                         continue;
                     }
 
-                    column.Add(characters[i]);
-                    column.Add(characters[i+1]);
-                   
-                    if (i == characters.Length - 2)
+                    column.Add(readerBytes[i]);
+                 //   column.Add(readerBytes[i + 1]);
+
+                    if (i == readerBytes.Length - 2)
                     {
+                        if (theByte ==10)
+                        {
+                            break;
+                        }
                         line.Add(column);
                         _set.Add(line);
 
                         break;
                     }
-                }                
+                }
             }
 
-            var max = _set.Max(e => e.Count);   
-            _file.SetupSetFile(_set);            
-            return _file;
+            var max = _set.Max(e => e.Count);
+            var _file = new CSVFile();
+            _file.SetupSetFile(_set);
+            return _file; 
         }
-
 
 
         IList<IList<byte>> NewLine()
@@ -107,41 +121,4 @@ namespace CSVSharp
 
      
     }
-
-    public class CSVFile
-    {
-        private IList<IList<IList<byte>>> _set;
-
-        public void SetupSetFile(IList<IList<IList<byte>>> set)
-        {
-            _set = set;
-            var max = _set.Max(e => e.Count);
-            Columns = max;
-            Lines = _set.Count;
-        }
-
-        public int Lines
-        {
-            get; set;
-        }
-
-        public int Columns
-        {
-            get;
-            set;
-        }
-
-        public string Cell(int line, int column)
-        {
-            var ln = _set[line];
-            var cell = ln[column];
-            char[] chars = new char[cell.Count / sizeof(char)];
-            System.Buffer.BlockCopy(cell.ToArray(), 0, chars, 0, cell.Count);
-            return new string(chars).Trim();
-        }
-
-    }
-
-  
-    
 }
