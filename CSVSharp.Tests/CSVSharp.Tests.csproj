@@ -62,6 +62,14 @@
       <Name>CSVSharp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="file.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="file1.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

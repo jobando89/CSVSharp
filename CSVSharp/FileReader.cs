@@ -11,10 +11,6 @@ namespace CSVSharp
     public class FileReader
     {
 
-       
-     
-     
-
         public CSVFile ReadLines(string lineInput)
         {
             var characters = GetBytes(lineInput);
@@ -32,7 +28,7 @@ namespace CSVSharp
                 var special = false;
                 var line = NewLine();
                 var column = NewColumn();
-                for (int i = 0; i < readerBytes.Length; i ++ )
+                for (int i = 0; i < readerBytes.Length; i = i+1 )
                 {
                     byte theByte = readerBytes[i];
                     switch (theByte)
@@ -81,7 +77,7 @@ namespace CSVSharp
                     column.Add(readerBytes[i]);
                  //   column.Add(readerBytes[i + 1]);
 
-                    if (i == readerBytes.Length - 2)
+                    if (i == readerBytes.Length -1)
                     {
                         if (theByte ==10)
                         {
@@ -94,13 +90,92 @@ namespace CSVSharp
                     }
                 }
             }
-
-            var max = _set.Max(e => e.Count);
             var _file = new CSVFile();
             _file.SetupSetFile(_set);
             return _file; 
         }
 
+        public IList<IList<IList<byte>>> ReadBytes(byte[] readerBytes)
+        {
+            bool _scaped;
+            IList<IList<IList<byte>>> _set = new List<IList<IList<byte>>>();
+            _scaped = false;
+            using (new MemoryStream(readerBytes))
+            {
+                var special = false;
+                var line = NewLine();
+                var column = NewColumn();
+                for (int i = 0; i < readerBytes.Length; i = i + 1)
+                {
+                    byte theByte = readerBytes[i];
+                    switch (theByte)
+                    {
+                        case 0:
+                            special = true;
+                            break;
+                        case 44:// ,
+                            if (_scaped)
+                            {
+                                break;
+                            }
+                            line.Add(column);
+                            column = NewColumn();
+                            special = true;
+                            break;
+                        case 13:
+                            special = true;
+                            break;
+                        case 10:// \n
+                            if (_scaped)
+                            {
+                                special = true;
+                                break;
+                            }
+
+                            line.Add(column);
+                            _set.Add(line);
+
+                            column = NewColumn();
+                            line = NewLine();
+
+                            break;
+                        case 34:// "
+                            special = true;
+                            _scaped = !_scaped;
+                            break;
+                    }
+
+                    if (special)
+                    {
+                        special = false;
+                        continue;
+                    }
+
+                    column.Add(readerBytes[i]);
+                    //   column.Add(readerBytes[i + 1]);
+
+                    if (i == readerBytes.Length - 2)
+                    {
+                        if (theByte == 10)
+                        {
+                            break;
+                        }
+                        line.Add(column);
+                        _set.Add(line);
+
+                        break;
+                    }
+                }
+            }
+            return _set;               
+        }
+
+        public CSVFile GetCSVFile(IList<IList<IList<byte>>> _set)
+        {
+            var _file = new CSVFile();
+            _file.SetupSetFile(_set);
+            return _file; 
+        } 
 
         IList<IList<byte>> NewLine()
         {

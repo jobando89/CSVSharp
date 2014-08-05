@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSVSharp.Tests
@@ -99,6 +101,50 @@ namespace CSVSharp.Tests
             var test = reader.ReadLines(lineInput);
             var result = test.Cell(0, 0);
             Assert.AreEqual("Col1", result);
+        }
+
+        [TestMethod]
+        public void ColumnHeaders()
+        {
+            var lineInput = "T1, T2, T3 \n Col1, Col2, Col3";
+            var reader = new FileReader();
+            var test = reader.ReadLines(lineInput);
+            var result = test.Cell(0, 1);
+            Assert.AreEqual("T2", result);
+        }
+
+        [TestMethod]
+        public void ColumnHeadersMalformed()
+        {
+            var lineInput = "T1, \"T2, T3\" \n Col1, Col2, Col3";
+            var reader = new FileReader();
+            var test = reader.ReadLines(lineInput);
+            var result = test.Cell(0, 2);
+            Assert.AreEqual("", result);
+        }
+
+        [TestMethod]
+        public void ColumnHeadersExtended()
+        {
+            var lineInput = "T1, T2, T3 \r\n Col1, Col2, Col3";
+            var reader = new FileReader();
+            var test = reader.ReadLines(lineInput);
+            var result = test.Cell(1, 2);
+            Assert.AreEqual("Col3", result);
+        }
+
+        [TestMethod]
+        public void ColumnHeadersTest1()
+        {
+            var bytes = File.ReadAllBytes("file1.csv");     
+            var reader = new FileReader();
+            //Stopwatch stopWatch = new Stopwatch();
+            //stopWatch.Start();
+            var test = reader.ReadLines(bytes);
+            //stopWatch.Stop();
+            //Console.WriteLine(stopWatch.Elapsed);
+            var result = test.Cell(test.Lines-1, test.Columns-1);
+            Assert.AreEqual("160.204.204.1320", result);
         }
 
     }

@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSVSharp", "CSVSharp\CSVSha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSVSharp.Tests", "CSVSharp.Tests\CSVSharp.Tests.csproj", "{C5202208-F3F2-4D04-AF91-57F205374032}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSVSharp.WindowForm", "CSVSharp.WindowForm\CSVSharp.WindowForm.csproj", "{FDAF06F1-77D2-4FC9-9F07-69C8FAEB2731}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{C5202208-F3F2-4D04-AF91-57F205374032}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5202208-F3F2-4D04-AF91-57F205374032}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5202208-F3F2-4D04-AF91-57F205374032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDAF06F1-77D2-4FC9-9F07-69C8FAEB2731}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDAF06F1-77D2-4FC9-9F07-69C8FAEB2731}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDAF06F1-77D2-4FC9-9F07-69C8FAEB2731}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDAF06F1-77D2-4FC9-9F07-69C8FAEB2731}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
