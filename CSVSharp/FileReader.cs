@@ -13,169 +13,82 @@ namespace CSVSharp
 
         public CSVFile ReadLines(string lineInput)
         {
-            var characters = GetBytes(lineInput);
+            var characters = Encoding.ASCII.GetBytes(lineInput);
             return ReadLines(characters);
         }
 
+        private IList<IList<IList<byte>>> _set;
+
         public CSVFile ReadLines(byte[] readerBytes)
         {
-            IList<IList<IList<byte>>> _set;
-            bool _scaped;
-            _set = new List<IList<IList<byte>>>();
-            _scaped = false;
+            _set = new List<IList<IList<byte>>>();            
             using (new MemoryStream(readerBytes))
+            {                  
+                GetValue(readerBytes);
+            }
+            var file = new CSVFile(_set);            
+            return file; 
+        }
+
+        private void GetValue(byte[] readerBytes)
+        {
+            var scaped = false;
+            var line = NewLine();
+            var column = NewColumn();
+            var special = false;
+            for (var i = 0; i < readerBytes.Length; i = i + 1)
             {
-                var special = false;
-                var line = NewLine();
-                var column = NewColumn();
-                for (int i = 0; i < readerBytes.Length; i = i+1 )
+                var theByte = readerBytes[i];
+                switch (theByte)
                 {
-                    byte theByte = readerBytes[i];
-                    switch (theByte)
-                    {
-                        case 0:
-                            special = true;
-                            break;
-                        case 44:// ,
-                            if (_scaped)
-                            {
-                                break;
-                            }
-                            line.Add(column);
-                            column = NewColumn();
-                            special = true;
-                            break;
-                        case 13:
-                            special = true;
-                            break;
-                        case 10:// \n
-                            if (_scaped)
-                            {
-                                special = true;
-                                break;
-                            }
-
-                            line.Add(column);
-                            _set.Add(line);
-
-                            column = NewColumn();
-                            line = NewLine();
-
-                            break;
-                        case 34:// "
-                            special = true;
-                            _scaped = !_scaped;
-                            break;
-                    }
-
-                    if (special)
-                    {
-                        special = false;
-                        continue;
-                    }
-
-                    column.Add(readerBytes[i]);
-                 //   column.Add(readerBytes[i + 1]);
-
-                    if (i == readerBytes.Length -1)
-                    {
-                        if (theByte ==10)
+                    case 0:
+                        special = true;
+                        break;
+                    case 44: // ,
+                        if (scaped)
                         {
                             break;
                         }
                         line.Add(column);
-                        _set.Add(line);
-
+                        column = NewColumn();
+                        special = true;
                         break;
-                    }
+                    case 13:
+                        special = true;
+                        break;
+                    case 10: // \n
+                        if (EvaluateChracter(ref special)) break;
+                        SetColumnAndLine(line, column);
+                        column = NewColumn();
+                        line = NewLine();
+                        break;
+                    case 34: // "
+                        special = true;
+                        scaped = !scaped;
+                        break;
                 }
+                if (EvaluateChracter(ref special)) continue;
+                column.Add(readerBytes[i]);
+                if (i != readerBytes.Length - 1) continue;
+                SetColumnAndLine(line, column);
             }
-            var _file = new CSVFile();
-            _file.SetupSetFile(_set);
-            return _file; 
         }
 
-        public IList<IList<IList<byte>>> ReadBytes(byte[] readerBytes)
+        private static bool EvaluateChracter(ref bool special)
         {
-            bool _scaped;
-            IList<IList<IList<byte>>> _set = new List<IList<IList<byte>>>();
-            _scaped = false;
-            using (new MemoryStream(readerBytes))
+            if (special)
             {
-                var special = false;
-                var line = NewLine();
-                var column = NewColumn();
-                for (int i = 0; i < readerBytes.Length; i = i + 1)
-                {
-                    byte theByte = readerBytes[i];
-                    switch (theByte)
-                    {
-                        case 0:
-                            special = true;
-                            break;
-                        case 44:// ,
-                            if (_scaped)
-                            {
-                                break;
-                            }
-                            line.Add(column);
-                            column = NewColumn();
-                            special = true;
-                            break;
-                        case 13:
-                            special = true;
-                            break;
-                        case 10:// \n
-                            if (_scaped)
-                            {
-                                special = true;
-                                break;
-                            }
-
-                            line.Add(column);
-                            _set.Add(line);
-
-                            column = NewColumn();
-                            line = NewLine();
-
-                            break;
-                        case 34:// "
-                            special = true;
-                            _scaped = !_scaped;
-                            break;
-                    }
-
-                    if (special)
-                    {
-                        special = false;
-                        continue;
-                    }
-
-                    column.Add(readerBytes[i]);
-                    //   column.Add(readerBytes[i + 1]);
-
-                    if (i == readerBytes.Length - 2)
-                    {
-                        if (theByte == 10)
-                        {
-                            break;
-                        }
-                        line.Add(column);
-                        _set.Add(line);
-
-                        break;
-                    }
-                }
+                special = false;
+                return true;
             }
-            return _set;               
+            return false;
         }
 
-        public CSVFile GetCSVFile(IList<IList<IList<byte>>> _set)
+        private void SetColumnAndLine(IList<IList<byte>> line, List<byte> column)
         {
-            var _file = new CSVFile();
-            _file.SetupSetFile(_set);
-            return _file; 
-        } 
+            line.Add(column);
+            _set.Add(line);
+        }
 
         IList<IList<byte>> NewLine()
         {
