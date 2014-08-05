@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -19,29 +20,10 @@ namespace CSVSharp.WindowForm
 
         private DataTable GetResults()
         {
-            var lineInput  = "";
+            var bytes = File.ReadAllBytes("file.csv");
             var reader = new FileReader();
-            var test = reader.ReadLines(lineInput);
-            //var result = test.Cell(test.Lines - 1, test.Columns - 1);
-
-            DataTable table = new DataTable();
-            for (var i=0; i<test.Columns;i++)
-            {
-                table.Columns.Add(new DataColumn(test.Header(i)));
-            }
-
-            for (var line = 1; line < test.Lines; line++)
-            {
-                var row = table.NewRow();
-                for (var col = 0; col < test.Columns; col++)
-                {                    
-                    row[col] = test.Cell(line, col);                 
-                }
-                table.Rows.Add(row);
-            }
-            
-            
-            return table;
+            var test = reader.ReadLines(bytes);
+            return test.GetDataTable(false);
         }
     }
 }

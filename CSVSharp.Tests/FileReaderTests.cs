@@ -144,7 +144,7 @@ namespace CSVSharp.Tests
             //stopWatch.Stop();
             //Console.WriteLine(stopWatch.Elapsed);
             var result = test.Cell(test.Lines-1, test.Columns-1);
-            Assert.AreEqual("160.204.204.1320", result);
+            Assert.AreEqual("160.204.204.13!0", result);
         }
 
     }
