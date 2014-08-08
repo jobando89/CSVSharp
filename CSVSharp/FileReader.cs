@@ -13,30 +13,39 @@ namespace CSVSharp
         private readonly ReaderLineManager _lineManager;
         private readonly ReaderColumnManager _columnManager;
         private IList<string[]> _set;
+        private bool _characterSkipper;
+
 
         public FileReader()
         {
             _lineManager = new ReaderLineManager();
             _columnManager = new ReaderColumnManager();
         }
-        
+
         public CSVFile ReadLines(string lineInput)
         {
-            var characters = Encoding.ASCII.GetBytes(lineInput);
-            return ReadLines(characters);
+            return ReadLines(lineInput, false);
         }
 
-        
-        private bool _characterSkipper;
-
         public CSVFile ReadLines(byte[] readerBytes)
+        {
+            return ReadLines(readerBytes, false);
+        }
+
+        public CSVFile ReadLines(string lineInput, bool hasHeaders)
+        {
+            var characters = Encoding.ASCII.GetBytes(lineInput);
+            return ReadLines(characters, hasHeaders);
+        }                
+
+        public CSVFile ReadLines(byte[] readerBytes, bool hasHeaders)
         {
             _set = new List<string[]>();            
             using (new MemoryStream(readerBytes))
             {                  
                 GetValue(readerBytes);
             }
-            var file = new CSVFile(_set);            
+            var file = new CSVFile(_set, hasHeaders);            
             return file; 
         }
         
