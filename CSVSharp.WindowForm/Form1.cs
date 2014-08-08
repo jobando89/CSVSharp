@@ -23,7 +23,7 @@ namespace CSVSharp.WindowForm
             var bytes = File.ReadAllBytes("file.csv");
             var reader = new FileReader();
             var test = reader.ReadLines(bytes);
-            return test.GetDataTable(false);
+            return test.GetDataTable(true);
         }
     }
 }

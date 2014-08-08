@@ -8,17 +8,18 @@ namespace CSVSharp
 {
     public class CSVFile
     {
-        public CSVFile(IList<IList<IList<byte>>> set)
+
+        private IList<string[]> _set;
+
+        public CSVFile(IList<string[]> set)
         {
             SetupSetFile(set);           
-        }
-        
-        private IList<IList<IList<byte>>> _set;
+        }                
 
-        void SetupSetFile(IList<IList<IList<byte>>> set)
+        void SetupSetFile(IList<string[]> set)
         {
             _set = set;
-            var max = _set.Max(e => e.Count);
+            var max = _set.Max(e => e.Length);
             Columns = max;
             Lines = _set.Count;
         }
@@ -45,22 +46,17 @@ namespace CSVSharp
                 throw new Exception("");
             }
             var ln = _set[line];
-            var cell = ln.ElementAtOrDefault(column);
-            if (cell ==null)
+            var cell = "";
+            if (column < ln.Length)
             {
-                return "";
+                cell = ln[column].Trim();
             }
-
-            return Encoding.ASCII.GetString(cell.ToArray()).Trim();
-
-           // char[] chars = new char[cell.Count / sizeof(char)];
-           // System.Buffer.BlockCopy(cell.ToArray(), 0, chars, 0, cell.Count);
-           // return new string(chars).Trim();
+            return cell;
         }
 
         public DataTable GetDataTable(bool withHeaders)
         {
-            int startLine = 0;
+            var startLine = 0;
             var table = new DataTable();
             if (withHeaders)
             {

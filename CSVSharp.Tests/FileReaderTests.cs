@@ -124,6 +124,16 @@ namespace CSVSharp.Tests
         }
 
         [TestMethod]
+        public void ColumnHeadersMalformedTest2()
+        {
+            var lineInput = "T1, \"T2, T3\" \n Col1, Col2, Col3";
+            var reader = new FileReader();
+            var test = reader.ReadLines(lineInput);
+            var result = test.Columns;
+            Assert.AreEqual(3, result);
+        }
+
+        [TestMethod]
         public void ColumnHeadersExtended()
         {
             var lineInput = "T1, T2, T3 \r\n Col1, Col2, Col3";
@@ -138,11 +148,7 @@ namespace CSVSharp.Tests
         {
             var bytes = File.ReadAllBytes("file1.csv");     
             var reader = new FileReader();
-            //Stopwatch stopWatch = new Stopwatch();
-            //stopWatch.Start();
             var test = reader.ReadLines(bytes);
-            //stopWatch.Stop();
-            //Console.WriteLine(stopWatch.Elapsed);
             var result = test.Cell(test.Lines-1, test.Columns-1);
             Assert.AreEqual("160.204.204.13!0", result);
         }

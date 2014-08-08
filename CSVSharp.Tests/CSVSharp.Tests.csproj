@@ -64,6 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="file.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="file2.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="file1.csv">

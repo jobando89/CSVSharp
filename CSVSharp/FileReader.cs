@@ -10,18 +10,28 @@ namespace CSVSharp
 {
     public class FileReader
     {
+        private readonly ReaderLineManager _lineManager;
+        private readonly ReaderColumnManager _columnManager;
+        private IList<string[]> _set;
 
+        public FileReader()
+        {
+            _lineManager = new ReaderLineManager();
+            _columnManager = new ReaderColumnManager();
+        }
+        
         public CSVFile ReadLines(string lineInput)
         {
             var characters = Encoding.ASCII.GetBytes(lineInput);
             return ReadLines(characters);
         }
 
-        private IList<IList<IList<byte>>> _set;
+        
+        private bool _characterSkipper;
 
         public CSVFile ReadLines(byte[] readerBytes)
         {
-            _set = new List<IList<IList<byte>>>();            
+            _set = new List<string[]>();            
             using (new MemoryStream(readerBytes))
             {                  
                 GetValue(readerBytes);
@@ -29,84 +39,135 @@ namespace CSVSharp
             var file = new CSVFile(_set);            
             return file; 
         }
-
-        private void GetValue(byte[] readerBytes)
+        
+        private void GetValue(IList<byte> readerBytes)
         {
-            var scaped = false;
-            var line = NewLine();
-            var column = NewColumn();
-            var special = false;
-            for (var i = 0; i < readerBytes.Length; i = i + 1)
+            
+            _lineManager.SetupNewLine();
+            _columnManager.SetupNewLine();
+            _characterSkipper = false;
+
+            var quoteSwitch = false;
+            for (var i = 0; i < readerBytes.Count; i = i + 1)
             {
                 var theByte = readerBytes[i];
                 switch (theByte)
                 {
                     case 0:
-                        special = true;
+                        EmptyCharacter();
                         break;
                     case 44: // ,
-                        if (scaped)
-                        {
-                            break;
-                        }
-                        line.Add(column);
-                        column = NewColumn();
-                        special = true;
+                        if (quoteSwitch) break;                        
+                        CommaProcessor();
                         break;
                     case 13:
-                        special = true;
+                        _characterSkipper = true;
                         break;
                     case 10: // \n
-                        if (EvaluateChracter(ref special)) break;
-                        SetColumnAndLine(line, column);
-                        column = NewColumn();
-                        line = NewLine();
+                        if (IsItAComma()) break;
+                        SetColumnAndLine();
+                        _columnManager.SetupNewLine();
+                        _lineManager.SetupNewLine();
                         break;
                     case 34: // "
-                        special = true;
-                        scaped = !scaped;
+                        _characterSkipper = true;
+                        quoteSwitch = !quoteSwitch;
                         break;
                 }
-                if (EvaluateChracter(ref special)) continue;
-                column.Add(readerBytes[i]);
-                if (i != readerBytes.Length - 1) continue;
-                SetColumnAndLine(line, column);
+                if (IsItAComma()) continue;
+                _columnManager.AddByteToColumn(readerBytes[i]);
+                if (i != readerBytes.Count - 1) continue;
+                SetColumnAndLine( );
             }
         }
 
-        private static bool EvaluateChracter(ref bool special)
+        private void CommaProcessor()
         {
-            if (special)
-            {
-                special = false;
-                return true;
-            }
-            return false;
+            _lineManager.AddColumnsToLine(_columnManager);
+            _columnManager.SetupNewLine();
+            _characterSkipper = true;
         }
 
-        private void SetColumnAndLine(IList<IList<byte>> line, List<byte> column)
+        private void EmptyCharacter()
         {
-            line.Add(column);
-            _set.Add(line);
+            _characterSkipper = true;
         }
 
-        IList<IList<byte>> NewLine()
+
+        bool IsItAComma()
         {
-            return new List<IList<byte>>();
+            if (!_characterSkipper) return false;
+            _characterSkipper = false;
+            return true;
         }
 
-        List<byte> NewColumn()
+        private void SetColumnAndLine()
         {
-            return new List<byte>();
+            _lineManager.AddColumnsToLine(_columnManager);
+            _set.Add(_lineManager.LineColumnArray);
         }
 
-        byte[] GetBytes(string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
-        }
 
      
+    }
+
+    class ReaderLineManager
+    {
+        IList<string> ListLine { get; set; }
+
+
+        public ReaderLineManager()
+        {
+            SetupNewLine();
+        }
+
+        public void SetupNewLine()
+        {
+            ListLine = new List<string>();
+        }
+
+        public void AddColumnsToLine(ReaderColumnManager column)
+        {
+            var columnData = Encoding.ASCII.GetString(column.ByteColumnArray).Trim();
+            ListLine.Add(columnData);
+        }
+
+        public string[] LineColumnArray
+        {
+            get
+            {
+                return ListLine.ToArray();
+            }
+        }
+
+    }
+
+    class ReaderColumnManager
+    {
+        IList<byte> ListColumn { get; set; }
+
+        public ReaderColumnManager()
+        {
+            SetupNewLine();
+        }
+
+        public void SetupNewLine()
+        {
+            ListColumn = new List<byte>();
+        }
+
+        public void AddByteToColumn(byte character)
+        {
+            ListColumn.Add(character);
+        }
+
+        public byte[] ByteColumnArray
+        {
+            get
+            {
+                return ListColumn.ToArray();
+            }
+        }
+
     }
 }
