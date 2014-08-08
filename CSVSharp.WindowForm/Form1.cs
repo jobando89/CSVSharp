@@ -15,15 +15,30 @@ namespace CSVSharp.WindowForm
         public Form1()
         {
             InitializeComponent();
-            this.dataGridView1.DataSource = GetResults();
+            openFileDialog1.Filter = "CSV Files |*.csv";
+            // this.dataGridView1.DataSource = GetResults();
+
         }
 
-        private DataTable GetResults()
+        private void GetResults(string file)
         {
-            var bytes = File.ReadAllBytes("file.csv");
+            var bytes = File.ReadAllBytes(file);
+            //var bytes = File.ReadAllBytes("file.csv");
             var reader = new FileReader();
             var test = reader.ReadLines(bytes,true);
-            return test.GetDataTable();
+
+            toolStripStatusLabel1.Text = string.Format("Total Lines: {0}", test.Lines);
+            dataGridView1.DataSource = test.GetDataTable();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK) // Test result.
+            {
+                var file = openFileDialog1.FileName;
+                GetResults(file);
+            }             
         }
     }
 }

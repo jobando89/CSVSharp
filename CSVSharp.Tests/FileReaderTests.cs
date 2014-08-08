@@ -134,6 +134,16 @@ namespace CSVSharp.Tests
         }
 
         [TestMethod]
+        public void ColumnHeadersMalformedTest3()
+        {
+            var lineInput = "T1, \"T2, T3\" \n Col1, Col2, Col3";
+            var reader = new FileReader();
+            var test = reader.ReadLines(lineInput, true);
+            var result = test.Header(1);
+            Assert.AreEqual("T2, T3", result);
+        }
+
+        [TestMethod]
         public void ColumnHeadersExtended()
         {
             var lineInput = "T1, T2, T3 \r\n Col1, Col2, Col3";
@@ -166,5 +176,14 @@ namespace CSVSharp.Tests
         }
 
 
+        [TestMethod]
+        public void ColumnHeadersLineCountTest()
+        {
+            var lineInput = "T1, T2, T3 \r\n Col1, Col2, Col3 \r\n Col1, Col2, Col3 \r\n Col1, Col2, Col3";
+            var reader = new FileReader();
+            var test = reader.ReadLines(lineInput, true);            
+            var evalString = test.Lines;
+            Assert.AreEqual(3, evalString);
+        }
     }
 }

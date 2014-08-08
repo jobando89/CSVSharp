@@ -12,6 +12,14 @@ namespace CSVSharp
         private bool _hasHeaders;
         private IList<string[]> _set;
 
+        public bool HasHeaders
+        {
+            get
+            {
+                return _hasHeaders;
+            }
+        }
+
         public CSVFile(IList<string[]> set)
         {
             SetupSetFile(set, false);
